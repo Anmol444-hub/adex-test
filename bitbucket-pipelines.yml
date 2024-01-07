@@ -1,0 +1,18 @@
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Building JAR file using gradle
+          script:
+            - chmod +x gradlew
+            - ./gradlew clean build
+          artifacts:
+            - build/libs/<name>.jar
+      
+      - step:
+          name: Build Docker Images,running automated test and pushing it in container registry
+          script:
+           -  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+           -  docker build -t anmol44/adexproject .
+           -  docker run -rm anmol44/adexproject ./gradlew test
+           -  docker push anmol44/adexproject
