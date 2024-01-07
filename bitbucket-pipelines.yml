@@ -3,7 +3,7 @@ pipelines:
   branches:
     master:
       - step: 
-          name: Install necessary tools 
+          name: Install necessary tools for assessment
           script:
             - echo "Installing docker"
             - curl -fsSL https://get.docker.com -o get-docker.sh
