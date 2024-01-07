@@ -1,6 +1,20 @@
+image: maven:3.3.9
 pipelines:
   branches:
     master:
+      - step: 
+          name: Install necessary tools 
+          script:
+            - echo "Installing docker"
+            - curl -fsSL https://get.docker.com -o get-docker.sh
+            - sudo sh get-docker.sh
+            - sudo groupadd docker
+            - sudo usermod -aG docker $USER
+            - echo "Installing kubectl"
+            - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            - chmod +x kubectl
+            - sudo mv kubectl /usr/local/bin
+
       - step:
           name: Building JAR file using maven
           script:
