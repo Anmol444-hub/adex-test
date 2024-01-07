@@ -2,17 +2,26 @@ pipelines:
   branches:
     master:
       - step:
-          name: Building JAR file using gradle
+          name: Building JAR file using maven
           script:
-            - chmod +x gradlew
-            - ./gradlew clean build
+            - chmod +x mvnw
+            - ./maven clean build
           artifacts:
-            - build/libs/<name>.jar
+            - ./target/test-classes/QuoraApp-0.0.1-SNAPSHOT.jar
       
       - step:
-          name: Build Docker Images,running automated test and pushing it in container registry
+          name: Building DockerImages
           script:
            -  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
            -  docker build -t anmol44/adexproject .
-           -  docker run -rm anmol44/adexproject ./gradlew test
            -  docker push anmol44/adexproject
+
+      - step:
+          name: Deployment in k8s cluster
+          script:
+            - kubectl config set-cluster <k8s-cluster-name> --server=https://<k8s-api-server>
+            - kubectl config set-credentials <cluster-username> --token=$KUBE_TOKEN
+            - kubectl config set-context <cluster-context> --cluster=<k8s-cluster-name> --user=<cluster-username>
+            - kubectl config use-context <cluster-context>
+            - kubectl run adex-test --image=anmol44/adexproject:latest --replicas=2
+            - kubectl expose deployment adex-test --type=NodePort --port=8000
